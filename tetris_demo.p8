@@ -18,6 +18,13 @@ function _init()
 end
 
 function _update()
+	-- read user input
+	if btnp(0) and can_move_left(active_brick,board) then
+		move_left(active_brick)
+	elseif btnp(1) and can_move_right(active_brick,board) then
+		move_right(active_brick)
+	end		
+
 	turn_counter+=1
 	if turn_counter%30 == 0 then
 		turn_counter = 1
@@ -25,7 +32,7 @@ function _update()
 			write_to_board(active_brick,board)
 			initialize_long(active_brick)
 		else
-			move(active_brick,board)
+			drop(active_brick,board)
 		end
 	end
 end
@@ -60,12 +67,23 @@ function draw_active(active_brick, board)
 	end
 end
 
-function move(active_brick, board)
+function drop(active_brick, board)
 	for brick in all(active_brick) do
 		brick.y += 1
 	end
 end
 
+function move_left(active_brick)
+	for brick in all(active_brick) do
+		brick.x -= 1
+	end
+end
+
+function move_right(active_brick)
+	for brick in all(active_brick) do
+		brick.x += 1
+	end
+end
 
 -- check if a brick should stop falling
 -- stops if any part of the brick is at the bottom of the field 
@@ -79,6 +97,24 @@ function check_at_rest(active_brick,board)
 		end
 	end
 	return false
+end
+
+function can_move_left(active_brick,board)
+	for brick in all(active_brick) do
+		if brick.x == 1 or board[brick.y][brick.x-1] != 0 then
+			return false
+		end
+	end
+	return true
+end
+
+function can_move_right(active_brick,board)
+	for brick in all(active_brick) do
+		if brick.x == 10 or board[brick.y][brick.x+1] != 0 then
+			return false
+		end
+	end
+	return true
 end
 
 function write_to_board(active_brick,board)
