@@ -3,18 +3,33 @@ version 8
 __lua__
 board = {} -- an array representing the playing field
 
-for i=1,16 do
-	board[i] = {}
-	for j=1,10 do
-		board[i][j] = 0
+active_brick = {}	
+
+turn_counter = 1
+
+function _init()
+	for i=1,16 do
+		board[i] = {}
+		for j=1,10 do
+			board[i][j] = 0
+		end
+	end
+	initialize_t(active_brick)
+end
+
+function _update()
+	turn_counter+=1
+	if turn_counter%30 == 0 then
+		turn_counter = 1
+		if check_at_rest(active_brick,board) then
+			write_to_board(active_brick,board)
+			initialize_long(active_brick)
+		else
+			move(active_brick,board)
+		end
 	end
 end
 
-active_brick = {}
-active_brick[1] = {}
-active_brick[1].type = 1
-active_brick[1].x = 4
-active_brick[1].y = 1
 
 function _draw()
 	cls()
@@ -25,6 +40,7 @@ function _draw()
 	end
 	draw_active(active_brick, board)
 end
+
 -- draw a single square to the screen
 -- @param block_val - an int representing the block to draw
 -- @param x - the x coordinate on the board
@@ -37,12 +53,79 @@ function draw_square(block_val, x, y)
 	end
 end
 
-
+-- draw the active brick
 function draw_active(active_brick, board)
 	for brick in all(active_brick) do
 		draw_square(brick.type, brick.x, brick.y)
 	end
 end
+
+function move(active_brick, board)
+	for brick in all(active_brick) do
+		brick.y += 1
+	end
+end
+
+
+-- check if a brick should stop falling
+-- stops if any part of the brick is at the bottom of the field 
+-- or if there is a block in the board beneath it
+-- @param active_brick - the currently active brick
+-- @param board - the playing field
+function check_at_rest(active_brick,board)
+	for brick in all(active_brick) do
+		if brick.y == 16 or board[brick.y+1][brick.x] != 0 then
+			return true
+		end
+	end
+	return false
+end
+
+function write_to_board(active_brick,board)
+	for brick in all(active_brick) do
+		board[brick.y][brick.x] = brick.type
+	end
+end
+-- initialization methods for brick shapes
+
+function initialize_long(active_brick)
+	active_brick[1] = {}
+	active_brick[1].type = 1
+	active_brick[1].x = 4
+	active_brick[1].y = 1
+	active_brick[2] = {}
+	active_brick[2].type = 2
+	active_brick[2].x = 5
+	active_brick[2].y = 1
+	active_brick[3] = {}
+	active_brick[3].type = 2
+	active_brick[3].x = 6
+	active_brick[3].y = 1
+	active_brick[4] = {}
+	active_brick[4].type = 3
+	active_brick[4].x = 7
+	active_brick[4].y = 1
+end
+
+function initialize_t(active_brick)
+	active_brick[1] = {}
+	active_brick[1].type = 1
+	active_brick[1].x = 4
+	active_brick[1].y = 1
+	active_brick[2] = {}
+	active_brick[2].type = 4
+	active_brick[2].x = 5
+	active_brick[2].y = 1
+	active_brick[3] = {}
+	active_brick[3].type = 3
+	active_brick[3].x = 6
+	active_brick[3].y = 1
+	active_brick[4] = {}
+	active_brick[4].type = 50
+	active_brick[4].x = 5
+	active_brick[4].y = 2
+end
+
 __gfx__
 00000000cccccccccccccccccccccccccccccccccddddddddddddddcdddddddd0000000000000000000000000000000000000000000000000000000000000000
 00000000cddddddddddddddddddddddcddddddddcddddddddddddddcdddddddd0000000000000000000000000000000000000000000000000000000000000000
