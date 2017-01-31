@@ -7,6 +7,8 @@ active_brick = {}
 
 turn_counter = 1
 
+score = 0
+
 function _init()
 	for i=1,16 do
 		board[i] = {}
@@ -23,6 +25,8 @@ function _update()
 		move_left(active_brick)
 	elseif btnp(1) and can_move_right(active_brick,board) then
 		move_right(active_brick)
+	elseif btnp(2) and can_rotate(active_brick,board) then
+		rotate(active_brick)
 	end		
 
 	turn_counter+=1
@@ -35,11 +39,13 @@ function _update()
 			drop(active_brick,board)
 		end
 	end
+  score_board(board)
 end
 
 
 function _draw()
 	cls()
+  print(score,0,0,11)
 	for row=1,#board do
 		for col=1,#board[row] do
 			draw_square(board[row][col], col, row)
@@ -47,6 +53,28 @@ function _draw()
 	end
 	draw_active(active_brick, board)
 end
+
+function score_board(board)
+  for row=1,#board do
+    local row_full = true
+    for col=1,#board[row] do
+      row_full = row_full and board[row][col] != 1
+    end
+    if row_full then
+      score += 1
+      clear_row(board,row)
+    end
+  end
+end
+
+function clear_row(board, row)
+  for i=row,2 do
+    for col=1,#board[i] do
+      board[i][col] = 0
+    end
+  end
+end
+
 
 -- draw a single square to the screen
 -- @param block_val - an int representing the block to draw
@@ -67,6 +95,8 @@ function draw_active(active_brick, board)
 	end
 end
 
+-- brick movement
+
 function drop(active_brick, board)
 	for brick in all(active_brick) do
 		brick.y += 1
@@ -84,6 +114,59 @@ function move_right(active_brick)
 		brick.x += 1
 	end
 end
+
+function rotate(active_brick)
+  -- rotate element at index 1
+  if active_brick[1].type == 1 then
+    active_brick[1].type = 18
+    active_brick[1].x += 1
+    active_brick[1].y -= 1
+  elseif active_brick[1].type == 18 then
+    active_brick[1].type = 3
+    active_brick[1].x += 1
+    active_brick[1].y += 1
+  elseif active_brick[1].type == 3 then
+    active_brick[1].type = 50
+    active_brick[1].x -= 1
+    active_brick[1].y += 1
+  elseif active_brick[1].type == 50 then
+    active_brick[1].type = 1
+    active_brick[1].x -= 1
+    active_brick[1].y -= 1
+  elseif active_brick[1].type == 19 then
+    active_brick[1].type = 20
+    active_brick[1].x += 1
+    active_brick[1].y -= 1 
+  elseif active_brick[1].type == 20 then
+    active_brick[1].type = 36
+    active_brick[1].x += 1
+    active_brick[1].y += 1
+  elseif active_brick[1].type == 36 then
+    active_brick[1].type = 35
+    active_brick[1].x -= 1
+    active_brick[1].y += 1
+  elseif active_brick[1].type == 35 then
+    active_brick[1].type = 19
+    active_brick[1].x -= 1
+    active_brick[1].y -= 1 
+  end
+
+  -- rotate element at index 2
+  if active_brick[2].type == 2 then
+    active_brick[2].type = 34
+  elseif active_brick.type == 4 then
+    active_brick[2].type = 5
+  elseif active_brick.type == 5 then
+    active_brick[2].type = 6
+  elseif active_brick.type == 6 then
+    active_brick[2].type = 7
+  elseif active_brick.type == 7 then
+    active_brick[2].type = 4
+  end
+end
+-- end brick movement
+
+-- brick movement tests
 
 -- check if a brick should stop falling
 -- stops if any part of the brick is at the bottom of the field 
@@ -116,6 +199,12 @@ function can_move_right(active_brick,board)
 	end
 	return true
 end
+
+function can_rotate(active_brick,board)
+  return true
+end
+
+-- end brick movement tests
 
 function write_to_board(active_brick,board)
 	for brick in all(active_brick) do
