@@ -28,6 +28,13 @@ function _update()
 		move_right(active_brick)
 	elseif btnp(2) and can_rotate(active_brick,board) then
 		rotate(active_brick)
+	elseif btnp(3) then
+	 if check_at_rest(active_brick,board) then
+			write_to_board(active_brick,board)
+			initialize_long(active_brick)
+		else
+			drop(active_brick,board)
+		end
 	end		
 
 	turn_counter+=1
@@ -69,8 +76,12 @@ function score_board(board)
   end
 end
 
-function clear_row(board, row)
-	debug = row 
+-- overwrite all rows from some point with the row above
+-- this effectively moves everything down one row and clears
+-- the row indicated by row
+-- @param board - the board
+-- @param row - the index of the row that we're clearing
+function clear_row(board, row) 
 	i = row
 	while i >= 2 do
 		for col=1,#board[i] do
@@ -159,13 +170,15 @@ function rotate(active_brick)
   -- rotate element at index 2
   if active_brick[2].type == 2 then
     active_brick[2].type = 34
+  elseif active_brick[2].type == 34 then
+  		active_brick[2].type = 2
   elseif active_brick.type == 4 then
-    active_brick[2].type = 5
-  elseif active_brick.type == 5 then
     active_brick[2].type = 6
   elseif active_brick.type == 6 then
     active_brick[2].type = 7
   elseif active_brick.type == 7 then
+    active_brick[2].type = 5
+  elseif active_brick.type == 5 then
     active_brick[2].type = 4
   end
 end
