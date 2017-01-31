@@ -7,7 +7,8 @@ active_brick = {}
 
 turn_counter = 1
 
-score = 0
+score = 10
+debug = 0
 
 function _init()
 	for i=1,16 do
@@ -39,26 +40,27 @@ function _update()
 			drop(active_brick,board)
 		end
 	end
-  score_board(board)
+ score_board(board)
 end
 
 
 function _draw()
 	cls()
-  print(score,0,0,11)
 	for row=1,#board do
 		for col=1,#board[row] do
 			draw_square(board[row][col], col, row)
 		end
 	end
 	draw_active(active_brick, board)
+	print(score,0,0,11)
+	print(debug,0,10,11)
 end
 
 function score_board(board)
   for row=1,#board do
     local row_full = true
     for col=1,#board[row] do
-      row_full = row_full and board[row][col] != 1
+      row_full = row_full and board[row][col] != 0
     end
     if row_full then
       score += 1
@@ -68,11 +70,14 @@ function score_board(board)
 end
 
 function clear_row(board, row)
-  for i=row,2 do
-    for col=1,#board[i] do
-      board[i][col] = 0
-    end
+	debug = row 
+	i = row
+	while i >= 2 do
+		for col=1,#board[i] do
+   board[i][col] = board[i-1][col]
   end
+  i-=1
+ end
 end
 
 
@@ -182,6 +187,7 @@ function check_at_rest(active_brick,board)
 	return false
 end
 
+-- theres an indexing bug in here
 function can_move_left(active_brick,board)
 	for brick in all(active_brick) do
 		if brick.x == 1 or board[brick.y][brick.x-1] != 0 then
